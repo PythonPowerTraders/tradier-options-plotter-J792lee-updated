@@ -2,8 +2,14 @@
 #include <math.h>
 #include <stdio.h>
 
+#define M_1_SQRT2PI 0.3989422804014326779399460599343818684758586311649346576659258296
+
 double _norm_CDF(double x) {
     return 0.5 * erfc(-x * M_SQRT1_2);
+}
+
+double _norm_PDF(double x) {
+    return M_1_SQRT2PI * exp(-(x * x) * 0.5); 
 }
 
 double _d1(double sigma, double S, double K, double r, double q, double t) {
@@ -22,13 +28,22 @@ double put_price(double sigma, double S, double K, double r, double q, double t,
     return K * exp(-r * t) * _norm_CDF(-d2) - S * exp(-q * t) * _norm_CDF(-d1);
 }
 
-static PyObject* norm_CDF(PyObject* self, PyObject* args) {
+static PyObject* norm_CDF(PyObject* self, PyObject* args) { // standard normal
     double n;
 
     if (!PyArg_ParseTuple(args, "d", &n))
         return NULL;
 
     return Py_BuildValue("d", _norm_CDF(n));
+}
+
+static PyObject* norm_PDF(PyObject* self, PyObject* args) { //standard normal
+    double n;
+
+    if (!PyArg_ParseTuple(args, "d", &n))
+        return NULL;
+
+    return Py_BuildValue("d", _norm_PDF(n));
 }
 
 // Price, Underlying, Stike, time to expirey (% of year), risk-free rate (default 0), div-yield (default 0)
@@ -64,16 +79,19 @@ static PyObject* getCallVol(PyObject* self, PyObject* args) {
         double d2 = _d2(volGuess, S, K, r, q, t);
         double fx = call_price(volGuess, S, K, r, q, t, d1, d2) - price;
 
-        double vega = S * //norm
+        double vega = S *  _norm_PDF(d1) * sqrt(t);
+
+        volGuess = -fx / vega + vol;
+
+        epsilon = abs((volGuess- origVol) / origVol);
     }
 
-    printf("test");
-    Py_RETURN_NONE;
+    return Py_BuildValue("d", volGuess);
 }
 
 static PyMethodDef OptionMethods[] = {
     {"norm_CDF", norm_CDF, METH_VARARGS, "Calculate the CDF of a normal distribution at a certain value."},
-    {"hello", getCallPrice, METH_VARARGS, "Greet somebody."},
+    {"norm_PDF", norm_PDF, METH_VARARGS, "Calculate the PDF of a normal distribution at a certain value."},
     {NULL, NULL, 0, NULL}
 };
 
