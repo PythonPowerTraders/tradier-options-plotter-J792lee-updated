@@ -188,7 +188,7 @@ static PyObject* getVega(PyObject* self, PyObject* args) {
 
     double d1 = _d1(sigma, S, K, r, t);
 
-    return Py_BuildValue("d", _norm_PDF(d1) * S * sqrt(t));
+    return Py_BuildValue("d", _norm_PDF(d1) * S * sqrt(t) / 100);
 }
 
 static PyObject* getCallTheta(PyObject* self, PyObject* args) { 
@@ -205,19 +205,24 @@ static PyObject* getCallTheta(PyObject* self, PyObject* args) {
     double d2 = _d2(sigma, S, K, r, t);
 
     double theta = ((-S * _norm_PDF(d1) * sigma) / (2 * sqrt(t))) - r * K * exp(-r * t) * _norm_CDF(d2);
-    return Py_BuildValue("d", theta);
+    return Py_BuildValue("d", theta / 365.25);
 }
 
 static PyObject* getPutTheta(PyObject* self, PyObject* args) { 
     double sigma = 0.0;
     double S = 0.0;
-    double K = 0.0;Call
+    double K = 0.0;
+    double t = 0.0;
+    double r = 0.0;
+
+    if (!PyArg_ParseTuple(args, "ddddd", &sigma, &S, &K, &t, &r))
+        return NULL;
 
     double d1 = _d1(sigma, S, K, r, t);
     double d2 = _d2(sigma, S, K, r, t);
 
     double theta = ((-S * _norm_PDF(d1) * sigma) / (2 * sqrt(t))) + r * K * exp(-r * t) * _norm_CDF(-d2);
-    return Py_BuildValue("d", theta);
+    return Py_BuildValue("d", theta / 365.25);
 }
 
 static PyObject* getCallRho(PyObject* self, PyObject* args) { 
@@ -234,7 +239,7 @@ static PyObject* getCallRho(PyObject* self, PyObject* args) {
 
     double rho = K * t * exp(-r * t) * _norm_CDF(d2);
 
-    return Py_BuildValue("d", rho);
+    return Py_BuildValue("d", rho / 100);
 }
 
 static PyObject* getPutRho(PyObject* self, PyObject* args) { 
@@ -251,7 +256,7 @@ static PyObject* getPutRho(PyObject* self, PyObject* args) {
 
     double rho = -K * t * exp(-r * t) * _norm_CDF(-d2);
     
-    return Py_BuildValue("d", rho);
+    return Py_BuildValue("d", rho / 100);
 }
 
 static PyMethodDef OptionMethods[] = {
