@@ -13,7 +13,7 @@ double _norm_PDF(double x) {
 }
 
 double _d1(double sigma, double S, double K, double r, double q, double t) {
-    return log(S / K) + t * (r - q + (sigma * sigma) * 0.5) / (sigma * sqrt(t)); 
+    return (log(S / K) + t * (r - q + (sigma * sigma) * 0.5)) / (sigma * sqrt(t)); 
 }
 
 double _d2(double sigma, double S, double K, double r, double q, double t) {
@@ -55,13 +55,13 @@ static PyObject* getCallVol(PyObject* self, PyObject* args) {
     double r = 0.0;
     double q = 0.0;
 
-    const double tol = 0.001;
+    const double tol = 0.0001;
     double epsilon = 1.0;
     
     int count = 0;
     const int max_iter = 1000;
     
-    if (!PyArg_ParseTuple(args, "dddd|dd", &S, &K, &t, &r, &q))
+    if (!PyArg_ParseTuple(args, "ddddd|dd", &price, &S, &K, &t, &r, &q))
         return NULL;
 
 
@@ -81,9 +81,52 @@ static PyObject* getCallVol(PyObject* self, PyObject* args) {
 
         double vega = S *  _norm_PDF(d1) * sqrt(t);
 
-        volGuess = -fx / vega + vol;
+        volGuess = -fx / vega + volGuess;
 
-        epsilon = abs((volGuess- origVol) / origVol);
+        epsilon = fabs((volGuess - origVol) / origVol);
+    }
+
+    return Py_BuildValue("d", volGuess);
+}
+
+// Price, Underlying, Stike, time to expirey (% of year), risk-free rate (default 0), div-yield (default 0)
+static PyObject* getPutVol(PyObject* self, PyObject* args) { 
+    double price = 0.0;
+    double S = 0.0;
+    double K = 0.0;
+    double t = 0.0;
+    double r = 0.0;
+    double q = 0.0;
+
+    const double tol = 0.0001;
+    double epsilon = 1.0;
+    
+    int count = 0;
+    const int max_iter = 1000;
+    
+    if (!PyArg_ParseTuple(args, "ddddd|dd", &price, &S, &K, &t, &r, &q))
+        return NULL;
+
+
+    double volGuess = sqrt(2 * M_PI / t) * (price / S);
+    double origVol = volGuess;
+
+    while (epsilon > tol) {
+        count++;
+        if (count >= max_iter) {
+            return NULL;
+        }
+
+        origVol = volGuess;
+        double d1 = _d1(volGuess, S, K, r, q, t);
+        double d2 = _d2(volGuess, S, K, r, q, t);
+        double fx = put_price(volGuess, S, K, r, q, t, d1, d2) - price;
+
+        double vega = S *  _norm_PDF(d1) * sqrt(t);
+
+        volGuess = -fx / vega + volGuess;
+
+        epsilon = fabs((volGuess- origVol) / origVol);
     }
 
     return Py_BuildValue("d", volGuess);
@@ -92,6 +135,8 @@ static PyObject* getCallVol(PyObject* self, PyObject* args) {
 static PyMethodDef OptionMethods[] = {
     {"norm_CDF", norm_CDF, METH_VARARGS, "Calculate the CDF of a normal distribution at a certain value."},
     {"norm_PDF", norm_PDF, METH_VARARGS, "Calculate the PDF of a normal distribution at a certain value."},
+    {"getCallVol", getCallVol, METH_VARARGS, "Calculate the volitility of a call option."},
+    {"getPutVol", getPutVol, METH_VARARGS, "Calculate the volitility of a put option."},
     {NULL, NULL, 0, NULL}
 };
 
