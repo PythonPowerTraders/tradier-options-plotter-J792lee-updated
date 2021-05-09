@@ -89,8 +89,9 @@ static PyObject* getCallVol(PyObject* self, PyObject* args) {
     double r = 0.0;
 
     const double tol = 0.0001;
-    double epsilon = 1.0;
-    
+    double known_min = 0.0;
+    double known_max = 10.0;
+
     int count = 0;
     const int max_iter = 1000;
     
@@ -99,24 +100,34 @@ static PyObject* getCallVol(PyObject* self, PyObject* args) {
 
 
     double volGuess = sqrt(2 * M_PI / t) * (price / S);
-    double origVol = volGuess;
+    double d1 = _d1(volGuess, S, K, r, t);
+    double d2 = _d2(volGuess, S, K, r, t);
+    double opt_val = call_price(volGuess, S, K, r, t, d1, d2);
+    double diff = opt_val - price;
 
-    while (epsilon > tol) {
+    while (fabs(diff) > tol) {
         count++;
         if (count >= max_iter) {
             return NULL;
         }
 
-        origVol = volGuess;
-        double d1 = _d1(volGuess, S, K, r, t);
-        double d2 = _d2(volGuess, S, K, r, t);
-        double fx = call_price(volGuess, S, K, r, t, d1, d2) - price;
+        if (diff > 0) {
+            known_max = volGuess;
+            volGuess = (known_min + known_max) / 2;
+        }
+        else {
+            known_min = volGuess;
+            volGuess = (known_min + known_max) / 2;
+        }
+        
+        d1 = _d1(volGuess, S, K, r, t);
+        d2 = _d2(volGuess, S, K, r, t);
+        opt_val = call_price(volGuess, S, K, r, t, d1, d2);
+        diff = opt_val - price;
 
-        double vega = S *  _norm_PDF(d1) * sqrt(t);
-
-        volGuess = -fx / vega + volGuess;
-
-        epsilon = fabs((volGuess - origVol) / origVol);
+        if (volGuess < 0.001) {
+            return Py_BuildValue("d", 0.0);
+        }
     }
 
     return Py_BuildValue("d", volGuess);
@@ -130,36 +141,46 @@ static PyObject* getPutVol(PyObject* self, PyObject* args) {
     double t = 0.0;
     double r = 0.0;
 
-
     const double tol = 0.0001;
-    double epsilon = 1.0;
-    
+    double known_min = 0.0;
+    double known_max = 10.0;
+
     int count = 0;
     const int max_iter = 1000;
     
-    if (!PyArg_ParseTuple(args, "ddddd|dd", &price, &S, &K, &t, &r))
+    if (!PyArg_ParseTuple(args, "ddddd|d", &price, &S, &K, &t, &r))
         return NULL;
 
 
     double volGuess = sqrt(2 * M_PI / t) * (price / S);
-    double origVol = volGuess;
+    double d1 = _d1(volGuess, S, K, r, t);
+    double d2 = _d2(volGuess, S, K, r, t);
+    double opt_val = put_price(volGuess, S, K, r, t, d1, d2);
+    double diff = opt_val - price;
 
-    while (epsilon > tol) {
+    while (fabs(diff) > tol) {
         count++;
         if (count >= max_iter) {
             return NULL;
         }
 
-        origVol = volGuess;
-        double d1 = _d1(volGuess, S, K, r, t);
-        double d2 = _d2(volGuess, S, K, r, t);
-        double fx = put_price(volGuess, S, K, r, t, d1, d2) - price;
+        if (diff > 0) {
+            known_max = volGuess;
+            volGuess = (known_min + known_max) / 2;
+        }
+        else {
+            known_min = volGuess;
+            volGuess = (known_min + known_max) / 2;
+        }
+        
+        d1 = _d1(volGuess, S, K, r, t);
+        d2 = _d2(volGuess, S, K, r, t);
+        opt_val = put_price(volGuess, S, K, r, t, d1, d2);
+        diff = opt_val - price;
 
-        double vega = S *  _norm_PDF(d1) * sqrt(t);
-
-        volGuess = -fx / vega + volGuess;
-
-        epsilon = fabs((volGuess- origVol) / origVol);
+        if (volGuess < 0.001) {
+            return Py_BuildValue("d", 0.0);
+        }
     }
 
     return Py_BuildValue("d", volGuess);
@@ -300,9 +321,7 @@ static PyMethodDef OptionMethods[] = {
     {"getPutPrice", getPutPrice, METH_VARARGS, "Calculate the price of a put option."},    
     {"getCallVol", getCallVol, METH_VARARGS, "Calculate the volitility of a call option."},
     {"getPutVol", getPutVol, METH_VARARGS, "Calculate the volitility of a put option."},
-    {"getCallDelta", getCallDelta, METH_VARARG        d1 =
-        d2 = 
-        output = {"d1": d1, "d2": d2}S, "Calculate the delta of a call option."},
+    {"getCallDelta", getCallDelta, METH_VARARGS, "Calculate the delta of a call option."},
     {"getPutDelta", getPutDelta, METH_VARARGS, "Calculate the delta of a put option."},
     {"getGamma", getGamma, METH_VARARGS, "Calculate the gamma of an option."},
     {"getVega", getVega, METH_VARARGS, "Calculate the vega of an option."},    
