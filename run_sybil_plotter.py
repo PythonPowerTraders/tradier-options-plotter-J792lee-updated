@@ -58,25 +58,33 @@ data_name = symbol + " $" + str(float(selected_price)/1000) + option_type + " ("
 # Plot title
 
 print("Now downloading trade data for: " + data_name)
-trade_data = trm.get_trade_data(option_symbol, 
-                                start_date, 
-                                settings['downloadBinning'], 
-                                should_use_history_endpoint, 
-                                settings['API_KEY'])
+try:
+    trade_data = trm.get_trade_data(option_symbol, 
+                                    start_date, 
+                                    settings['downloadBinning'], 
+                                    should_use_history_endpoint, 
+                                    settings['API_KEY'])
+except:
+    print("trade data could not be obtained")
 
 
 # Let's get data on the underlying and then match it up and calculate the IV at every point.
-underlying_data = trm.get_underlying_data(symbol,
+try:
+    underlying_data = trm.get_underlying_data(symbol,
                                           start_date, 
                                           settings['downloadBinning'], 
                                           should_use_history_endpoint, 
                                           settings['API_KEY'])
+except:
+    print("underlying data could not be obtained")
 
 # Make a candlestick plot of the option trade data
-tpm.plot_data(trade_data, 
-              underlying_data,
-              should_use_history_endpoint, 
-              data_name, 
-              settings)
-    
+try:
+    tpm.plot_data(trade_data, 
+                underlying_data,
+                should_use_history_endpoint, 
+                data_name, 
+                settings)
+except:
+    print("could not plot data")
 print("Program Reached End Of Execution.")

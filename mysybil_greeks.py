@@ -1,11 +1,12 @@
 # mysybil_greeks.py
-# Created by: MySybil.com
-# Last Modified: October 6, 2020
+# Created by: MySybil.com and Justin Lee
+# Last Modified: May 8, 2021
 # Description: Foundational code for options analysis
 
 import math
 from scipy.stats import norm
 from trading_calendars import get_calendar 
+import OptionsPricing
 
 class OptionAnalysis:
     """
@@ -54,27 +55,13 @@ class OptionAnalysis:
         self.is_call = is_call
         self.tol = tolerance
 
-    def _get_d(self, iv):
-        d1 = ((math.log(self.up / self.strike) + self.tte
-              * (self.rfr - self.dy + math.pow(iv, 2) / 2))
-              / (iv * math.sqrt(self.tte)))
-        d2 = d1 - iv * math.sqrt(self.tte)
-        return d1, d2
-
     def get_option_value(self, implied_volatility):
         """Calculate the theoretical value of an option."""
-        d1, d2 = self._get_d(implied_volatility)
 
         if self.is_call:
-            opt_val = (self.up * math.exp(-self.dy * self.tte)
-                       * norm.cdf(d1) - self.strike
-                       * math.exp(-self.rfr * self.tte) * norm.cdf(d2)
-            )
+            opt_val = OptionsPricing.getCallPrice(implied_volatility, self.up, self.strike, self.rfr, self.tte)
         else:
-            opt_val = (self.strike * math.exp(-self.rfr * self.tte)
-                       * norm.cdf(-d2) - self.up
-                       * math.exp(-self.dy * self.tte) * norm.cdf(-d1)
-            )
+            opt_val = OptionsPricing.getPutPrice(implied_volatility, self.up, self.strike, self.rfr, self.tte)
         return opt_val
 
     def get_market_year_fraction(start_date, end_date, adjustment):
@@ -98,107 +85,37 @@ class OptionAnalysis:
             print(f"Warning: Time to expiry is negative "
                   + f"for strike {self.strike}. Returning NaN...")
             return float('NaN')
-            #return 0
-          
-        known_min = 0
-        known_max = 10.0
+
         try:
-            iv_guess = (
-                math.sqrt(2 * math.pi / self.tte) * (self.op / self.strike)
-            )
-        except TypeError:
+            if self.is_call:
+                iv = OptionsPricing.getCallVol(self.op, self.up, self.strike, self.tte, self.rfr)
+            else:
+                iv = OptionsPricing.getPutVol(self.op, self.up, self.strike, self.tte, self.rfr)
+
+            if math.isnan(iv):
+                return 0
+        except:
             print("TypeError in IV calculation. Returning NaN")
             return float('NaN')
             #return 0
             
-        opt_val = self.get_option_value(iv_guess)
-        diff = opt_val - self.op
-
-        iterations = 0
-        while abs(diff) > self.tol:
-            if diff > 0:
-                known_max = iv_guess
-                iv_guess = (known_min + known_max) / 2
-            else:
-                known_min = iv_guess
-                iv_guess = (known_min + known_max) / 2
-
-            opt_val = self.get_option_value(iv_guess)
-            diff = opt_val - self.op
-
-            if iv_guess < 0.001:
-                return 0
-
-            iterations += 1
-            if iterations > max_iter:
-                print(f"Warning: Reached maximum number of iterations for "
-                      + f"implied volatility guess for strike {self.strike}. "
-                      + f"Returning 0...")
-                return 0
-
-        return iv_guess
+        return iv
 
     def get_greeks(self, implied_volatility):
         """Compute the Greeks."""
-        T = 365.242199
-        d1, d2 = self._get_d(implied_volatility)
-        output = {"d1": d1, "d2": d2}
-        output["gamma"] = (
-            math.exp(-self.dy * self.tte)
-            / (self.up * implied_volatility * math.sqrt(self.tte))
-            * math.exp(-d1 * d1 / 2) / math.sqrt(2 * math.pi)
-        )
-        output["vega"] = (
-            0.01 * self.up
-            * math.exp(-self.dy * self.tte) * math.sqrt(self.tte)
-            * math.exp(-d1 * d1 / 2) / math.sqrt(2 * math.pi)
-        )
+        output = dict()
+        output["gamma"] = OptionsPricing.getGamma(implied_volatility, self.up, self.strike, self.tte, self.rfr)
+        output["vega"] = OptionsPricing.getVega(implied_volatility, self.up, self.strike, self.tte, self.rfr)
 
         if self.is_call:
             output["type"] = "call"
-            output["delta"] = (
-                math.exp(-self.dy * self.tte) * norm.cdf(d1)
-            )
-            output["theta"] = (
-                1 / T * (
-                    -(self.up * implied_volatility
-                    * math.exp(-self.dy * self.tte) / (2 * math.sqrt(self.tte))
-                    * math.exp(-d1 * d1 / 2) / math.sqrt(2 * math.pi))
-                    - self.rfr * self.strike * math.exp(-self.rfr * self.tte)
-                    * norm.cdf(d2) + self.dy * self.up
-                    * math.exp(-self.dy * self.tte) * norm.cdf(d1)
-                )
-            )
-            output["lambda"] = (
-                self.up / self.op
-                * math.exp(-self.dy * self.tte) * norm.cdf(d1)
-            )
-            output["rho"] = (
-                0.01 * self.strike * self.tte
-                * math.exp(-self.rfr * self.tte) * norm.cdf(d2)
-            )
+            output["delta"] = OptionsPricing.getCallDelta(implied_volatility, self.up, self.strike, self.tte, self.rfr)
+            output["theta"] = OptionsPricing.getCallTheta(implied_volatility, self.up, self.strike, self.tte, self.rfr)
+            output["rho"] = OptionsPricing.getCallRho(implied_volatility, self.up, self.strike, self.tte, self.rfr)
         else:
             output["type"] = "put"
-            output["delta"] = (
-                math.exp(-self.dy * self.tte) * (norm.cdf(d1) - 1)
-            )
-            output["theta"] = (
-                1 / T * (
-                    -(self.up * implied_volatility
-                    * math.exp(-self.dy * self.tte) / (2 * math.sqrt(self.tte))
-                    * math.exp(-d1 * d1 / 2) / math.sqrt(2 * math.pi))
-                    - self.rfr * self.strike * math.exp(-self.rfr * self.tte)
-                    * norm.cdf(-d2) + self.dy * self.up
-                    * math.exp(-self.dy * self.tte) * norm.cdf(-d1)
-                )
-            )
-            output["lambda"] = (
-                -self.up / self.op
-                * math.exp(-self.dy * self.tte) * norm.cdf(-d1)
-            )
-            output["rho"] = (
-                -0.01 * self.strike * self.tte
-                * math.exp(-self.rfr * self.tte) * norm.cdf(-d2)
-            )
+            output["delta"] = OptionsPricing.getPutDelta(implied_volatility, self.up, self.strike, self.tte, self.rfr)
+            output["theta"] = OptionsPricing.getPutTheta(implied_volatility, self.up, self.strike, self.tte, self.rfr)
+            output["rho"] = OptionsPricing.getPutRho(implied_volatility, self.up, self.strike, self.tte, self.rfr)
 
         return output

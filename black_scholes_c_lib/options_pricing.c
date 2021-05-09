@@ -12,22 +12,6 @@ double _norm_PDF(double x) {
     return M_1_SQRT2PI * exp(-(x * x) * 0.5); 
 }
 
-double _d1(double sigma, double S, double K, double r, double t) {
-    return (log(S / K) + t * (r + (sigma * sigma) * 0.5)) / (sigma * sqrt(t)); 
-}
-
-double _d2(double sigma, double S, double K, double r, double t) {
-    return _d1(sigma, S, K, r, t) - sigma * sqrt(t);
-}
-
-double call_price(double sigma, double S, double K, double r, double t, double d1, double d2) {
-    return S * _norm_CDF(d1) - K * exp(-r * t) * _norm_CDF(d2);
-}
-
-double put_price(double sigma, double S, double K, double r, double t, double d1, double d2) {
-    return K * exp(-r * t) * _norm_CDF(-d2) - S * _norm_CDF(-d1);
-}
-
 static PyObject* norm_CDF(PyObject* self, PyObject* args) { // standard normal
     double n;
 
@@ -44,6 +28,56 @@ static PyObject* norm_PDF(PyObject* self, PyObject* args) { //standard normal
         return NULL;
 
     return Py_BuildValue("d", _norm_PDF(n));
+}
+
+double _d1(double sigma, double S, double K, double r, double t) {
+    return (log(S / K) + t * (r + (sigma * sigma) * 0.5)) / (sigma * sqrt(t)); 
+}
+
+double _d2(double sigma, double S, double K, double r, double t) {
+    return _d1(sigma, S, K, r, t) - sigma * sqrt(t);
+}
+
+double call_price(double sigma, double S, double K, double r, double t, double d1, double d2) {
+    return S * _norm_CDF(d1) - K * exp(-r * t) * _norm_CDF(d2);
+}
+
+double put_price(double sigma, double S, double K, double r, double t, double d1, double d2) {
+    return K * exp(-r * t) * _norm_CDF(-d2) - S * _norm_CDF(-d1);
+}
+
+// Price, Underlying, Stike, time to expirey (% of year), risk-free rate (default 0)
+static PyObject* getCallPrice(PyObject* self, PyObject* args) { 
+    double sigma = 0.0;
+    double S = 0.0;
+    double K = 0.0;
+    double t = 0.0;
+    double r = 0.0;
+
+    if (!PyArg_ParseTuple(args, "ddddd|d", &sigma, &S, &K, &t, &r))
+        return NULL;
+
+    double d1 = _d1(sigma, S, K, r, t);
+    double d2 = _d2(sigma, S, K, r, t);
+
+    return Py_BuildValue("d", call_price(sigma, S, K, r, t, d1, d2));
+}
+
+// Price, Underlying, Stike, time to expirey (% of year), risk-free rate (default 0)
+static PyObject* getPutPrice(PyObject* self, PyObject* args) { 
+    double sigma = 0.0;
+    double S = 0.0;
+    double K = 0.0;
+    double t = 0.0;
+    double r = 0.0;
+
+    if (!PyArg_ParseTuple(args, "ddddd|d", &sigma, &S, &K, &t, &r))
+        return NULL;
+
+    double d1 = _d1(sigma, S, K, r, t);
+    double d2 = _d2(sigma, S, K, r, t);
+    
+    return Py_BuildValue("d", put_price(sigma, S, K, r, t, d1, d2));
 }
 
 // Price, Underlying, Stike, time to expirey (% of year), risk-free rate (default 0)
@@ -262,9 +296,13 @@ static PyObject* getPutRho(PyObject* self, PyObject* args) {
 static PyMethodDef OptionMethods[] = {
     {"norm_CDF", norm_CDF, METH_VARARGS, "Calculate the CDF of a normal distribution at a certain value."},
     {"norm_PDF", norm_PDF, METH_VARARGS, "Calculate the PDF of a normal distribution at a certain value."},
+    {"getCallPrice", getCallPrice, METH_VARARGS, "Calculate the price of a call option."},
+    {"getPutPrice", getPutPrice, METH_VARARGS, "Calculate the price of a put option."},    
     {"getCallVol", getCallVol, METH_VARARGS, "Calculate the volitility of a call option."},
     {"getPutVol", getPutVol, METH_VARARGS, "Calculate the volitility of a put option."},
-    {"getCallDelta", getCallDelta, METH_VARARGS, "Calculate the delta of a call option."},
+    {"getCallDelta", getCallDelta, METH_VARARG        d1 =
+        d2 = 
+        output = {"d1": d1, "d2": d2}S, "Calculate the delta of a call option."},
     {"getPutDelta", getPutDelta, METH_VARARGS, "Calculate the delta of a put option."},
     {"getGamma", getGamma, METH_VARARGS, "Calculate the gamma of an option."},
     {"getVega", getVega, METH_VARARGS, "Calculate the vega of an option."},    
