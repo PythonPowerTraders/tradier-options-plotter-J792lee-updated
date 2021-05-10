@@ -13,12 +13,13 @@ import tp_settings as tps
 import tp_ui_manager as tpu # formerly sui
 
 
-tpu.intro_screen();
+tpu.intro_screen()
 settings = tps.get_settings()
 symbol = input("Enter a symbol to proceed: ").upper()
 
-description = trm.background_info(symbol, settings['API_KEY']) 
+#description = trm.background_info(symbol, settings['API_KEY']) 
 option_type = trm.option_type(symbol)
+print(option_type)
 settings['type'] = option_type
 date_list   = trm.get_expiry_dates(symbol, settings['API_KEY']) 
 

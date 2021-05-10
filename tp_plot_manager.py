@@ -28,16 +28,15 @@ from mysybil_greeks import OptionAnalysis
 # Are we plotting intraday or daily data?
 def plot_data(data, underlying_data, should_use_history_endpoint, data_title, settings):
     if (should_use_history_endpoint):
-        plot_history(data, 
+        return plot_history(data, 
                      underlying_data, 
                      data_title, 
                      settings)
     else:
-        plot_timesales(data,
+        return plot_timesales(data,
                        underlying_data,
                        data_title, 
                        settings)
-    return 0
 
 
 # Make a plot of daily or longer data
@@ -105,12 +104,13 @@ def plot_history(data, underlying_data, data_title, settings):
         # Scatterplot of the implied volatility over time. 
 
         s = standard_style(settings)                
-        kwargs = dict(type='candle', volume=True)        
+        kwargs = dict(type='candle', volume=True)      
         mpf.plot(df, **kwargs, style=s, 
                 title=dict(title="\n\n" + data_title, weight='regular', size=11),                
                 datetime_format=' %m/%d/%Y',
                 tight_layout=settings['tight_layout'],
                 block=False,
+                returnfig=True,
                 ylabel="Option Price ($)")
                 
     else:
@@ -222,13 +222,15 @@ def plot_timesales(data, underlying_data, data_title, settings):
         # Super basic plot of the implied volatility over time. 
 
         s = standard_style(settings)                
-        kwargs = dict(type='candle',volume=True)  
-        mpf.plot(df, **kwargs, style=s, 
-                title=dict(title="\n\n" + data_title, weight='regular', size=11),               
-                datetime_format=' %m/%d %H:%M',
-                tight_layout=settings['tight_layout'],
-                block=False, #False
-                ylabel="Option Price ($)")        
+        kwargs = dict(type='candle',volume=True) 
+        print("----here-----") 
+        return mpf.plot(df, **kwargs, style=s, 
+                    title=dict(title="\n\n" + data_title, weight='regular', size=11),               
+                    datetime_format=' %m/%d %H:%M',
+                    #tight_layout=settings['tight_layout'],
+                    block=False, #False
+                    returnfig=True,
+                    ylabel="Option Price ($)")     
              
     else:
         print("No option trades during period.")

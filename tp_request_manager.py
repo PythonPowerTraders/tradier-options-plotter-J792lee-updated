@@ -93,9 +93,7 @@ def get_strike_list(ticker, expiry, api_key):
     return strikeList
 
 # Prompt the user for the earliest date in which they want to get data for, then determine whether to retrieve /history/ or /timesales/ data.
-def get_start_date(history_limit):
-    start_date = input("Input a start date for the data range (YYYY-mm-dd): ")
-    check_sentinel(start_date)
+def get_start_date(history_limit, start_date):
     try:
         start_datenum = datetime.strptime(start_date, "%Y-%m-%d")
     except ValueError:
@@ -109,7 +107,7 @@ def get_start_date(history_limit):
     if (current_time_seconds - start_date_seconds > history_limit*24*60*60):
         should_use_history_endpoint = True
 
-    return start_date, should_use_history_endpoint
+    return should_use_history_endpoint
 
 # Get a timeseries of all the trade data.
 def get_trade_data(option_symbol, start_date, binning, should_use_history_endpoint, api_key):
