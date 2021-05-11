@@ -57,14 +57,9 @@ You can then select the option specifications you desire.
 
 !
 
-Here, you can select what you want to plot. The options include price, IV, and the Greeks
+Here, you can select what you want to plot. The options include price, IV, and the Greeks.
 
 The program should download all the data and then display a candlestick chart of the trade data after each change you make to the specifications.
-
-
-
-
-Example Data Output (Daily data):
 
 * Note: the Implied Volatility data that is printed is the 'close' data point. See the note below. 
 
