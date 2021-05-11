@@ -1,8 +1,5 @@
-# MySybil's Historic Options Data Plotter
+# Extention of MySybil's Historic Options Data Plotter: Faster computations, implementation og Greeks, and updated UI
 
-v0.121 : these scripts now also calculate and display historic implied volatility data when you run your standard queries! The plots still need a bit of work but they are functional for now. Check out the implied volatility section at the bottom of this README for clarifications about what the volatility charts represent.
-
----
 
 This set of scripts aims to provide free access to historic options trade data for anyone that wants it. Whether you want to simply quickly view trade history, or if you want to use these scripts as a starting point to build from, the main hope is to save you time and provide you a small amount of independence from your broker and any websites trying to make money off of you.
 
@@ -20,20 +17,35 @@ pandas
 requests
 scipy
 trading_calendars
+tkinter
+python-dev
 ```
 
 Note: this package is currently running a custom version of mplfinance with additional personalization options for plots. 
 
+In this extention, I made a custom library in C that is used for the volatility computations. To install this library, navigate to /black_scholes_c_lib and run the command:
+
+```
+python3 setup.py install
+```
+This has currently only been tested on Ubuntu 16.04. Installation may be different on other operating systems. If the above command doesn't work, you can try
+
+```
+python3 setup.py build
+```
+
+and move the created .so file to the root directory.
+
+
 ### Run Example
 
-From the CLI run:
+To run:
 
 ```
-python3 run_sybil_plotter.py
+python3 main.py
 ```
 
-As a quick example, run the script and the first prompt should be to "Enter a symbol to proceed: "
-
+As a quick example, run the script and input a ticker in the "ticker" box. In this case, we will input SPY
 ```
 Enter: SPY
 ```
@@ -134,7 +146,7 @@ The mplfinance library is still under development and not-totally stable. I run 
 
 ## Authors
 
-* **MySybil.com**  
+* **MySybil.com, Justin Lee**  
 
 ## Acknowledgments
 
