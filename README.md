@@ -86,7 +86,8 @@ The mplfinance library is still under development and not-totally stable. I run 
 
 ## Authors
 
-* **MySybil.com, Justin Lee**  
+* **MySybil.com**
+* **Justin Lee**  
 
 ## Acknowledgments
 
