@@ -1,4 +1,4 @@
-# Extention of MySybil's Historic Options Data Plotter: Faster computations, implementation og Greeks, and updated UI
+# Extention of MySybil's Historic Options Data Plotter: Faster computations, implementation of Greeks, and updated UI
 
 ![Example](./screens/aapl_put.png)
 
@@ -48,17 +48,17 @@ python3 main.py
 
 As a quick example, run the script and input a ticker in the "ticker" box. In this case, we will input SPY
 
-!
-
 Here, you enter the ticker then click enter.
 
-!
+![SPY Ticker](./screens/spy_call_outline_ticker.png)
 
 You can then select the option specifications you desire.
 
-!
+![Specs](./screens/spy_call_outline_option.png)
 
 Here, you can select what you want to plot. The options include price, IV, and the Greeks.
+
+![what to plot](./screens/aapl_put.png)
 
 The program should download all the data and then display a candlestick chart of the trade data after each change you make to the specifications.
 
