@@ -6,6 +6,8 @@ This set of scripts aims to provide free access to historic options trade data f
 
 The scripts are plug-and-play from a Python3 CLI, but if you decide to use them on an ongoing basis then you should create your own account at developer.tradier.com and generate your own API token in order to alleviate any potential strain on the communal key provided. It's free, it only takes 30 seconds, and you'll never have to worry about fighting with other users around rate-limiting. 
 
+
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine.
@@ -38,6 +40,7 @@ python3 setup.py build
 and move the created .so file to the root directory.
 
 
+
 ### Run Example
 
 To run:
@@ -64,6 +67,8 @@ The program should download all the data and then display a candlestick chart of
 
 * Note: the Implied Volatility data that is printed is the 'close' data point. See the note below. 
 
+
+
 ### Implied Volatility
 
 So what's the deal with the volatility charts? What it comes down to is that to calculate the volatility at the time of the trade you need to know the current price of the underlying stock as well. The data that these scripts get from Tradier is the opening, closing, lowest, and highest price for an option (or stock) during a time period. Since options have inconsistent volume we can't determine when during that period any of the trades took place, so there's going inaccuracy in any volatility that gets calculate. This inaccuracy is small for data with a small interval size, but if we look at daily data for a low volume option then the calculations become unreliable.
@@ -83,6 +88,8 @@ SQQQ Volatility over the past week:
 There is an API key hard-coded into the script and it's totally cool for you to use this while deciding if you want to continue to use this script or not, but there is rate-limiting on it and the potential for that to become a problem. If you do plan to use this script frequently or build on-top of it, please head over to developer.tradier.com and sign up for free for an account and get your own API key.
 
 The mplfinance library is still under development and not-totally stable. I run into issues like having to change the window size of the plots manually to get them to auto-resize.
+
+
 
 ## Authors
 
