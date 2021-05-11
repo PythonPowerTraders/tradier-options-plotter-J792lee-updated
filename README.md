@@ -58,7 +58,7 @@ You can then select the option specifications you desire.
 
 Here, you can select what you want to plot. The options include price, IV, and the Greeks.
 
-![what to plot](./screens/aapl_put.png)
+![what to plot](./screens/spy_call_value.png)
 
 The program should download all the data and then display a candlestick chart of the trade data after each change you make to the specifications.
 
