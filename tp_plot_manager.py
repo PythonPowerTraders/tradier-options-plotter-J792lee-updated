@@ -1,6 +1,6 @@
 """
 tp_plot_manager.py
-Last Modified: October 8, 2020
+Last Modified: May 10, 2021
 Description: This script handles all the plotting for run_sybil_plotter.py
 
 # mplfinance style documentation
@@ -26,21 +26,23 @@ import time
 from mysybil_greeks import OptionAnalysis
 
 # Are we plotting intraday or daily data?
-def plot_data(data, underlying_data, should_use_history_endpoint, data_title, settings):
+def plot_data(data, underlying_data, should_use_history_endpoint, data_title, settings, toGraph="price"):
     if (should_use_history_endpoint):
         return plot_history(data, 
-                     underlying_data, 
-                     data_title, 
-                     settings)
+                    underlying_data, 
+                    data_title, 
+                    settings,
+                    toGraph)
     else:
         return plot_timesales(data,
-                       underlying_data,
-                       data_title, 
-                       settings)
+                    underlying_data,
+                    data_title, 
+                    settings,
+                    toGraph)
 
 
 # Make a plot of daily or longer data
-def plot_history(data, underlying_data, data_title, settings):
+def plot_history(data, underlying_data, data_title, settings, toGraph):
     check_data_validity(data)
     
     # ohlc for the underlying symbol. will use this to calculate IV
@@ -104,14 +106,15 @@ def plot_history(data, underlying_data, data_title, settings):
         # Scatterplot of the implied volatility over time. 
 
         s = standard_style(settings)                
-        kwargs = dict(type='candle', volume=True)      
-        mpf.plot(df, **kwargs, style=s, 
-                title=dict(title="\n\n" + data_title, weight='regular', size=11),                
-                datetime_format=' %m/%d/%Y',
-                tight_layout=settings['tight_layout'],
-                block=False,
-                returnfig=True,
-                ylabel="Option Price ($)")
+        kwargs = dict(type='candle', volume=True)
+        if (toGraph == "Price"):      
+            return mpf.plot(df, **kwargs, style=s, 
+                    title=dict(title="\n\n" + data_title, weight='regular', size=11),                
+                    datetime_format=' %m/%d/%Y',
+                    tight_layout=settings['tight_layout'],
+                    block=False,
+                    returnfig=True,
+                    ylabel="Option Price ($)")
                 
     else:
         print("No option trades during period.")
@@ -135,21 +138,23 @@ def plot_history(data, underlying_data, data_title, settings):
         df_iv = drop_weekends(df_iv)    
         # Resample the volatility data.
         
-        s = volatility_style(settings)
+        s = standard_style(settings)
         kwargs = dict(type='candle',volume=False)
-        mpf.plot(df_iv, **kwargs, style=s, 
-                mav=3,
-                title=dict(title="\n\nImplied Volatility for " + data_title, weight='regular', size=11),               
-                datetime_format=' %m/%d/%Y',
-                tight_layout=settings['tight_layout'],
-                block=True,
-                ylabel="Implied Volatility (%)")        
+        if toGraph == "IV":
+            return mpf.plot(df_iv, **kwargs, style=s, 
+                        mav=3,
+                        title=dict(title="\n\nImplied Volatility for " + data_title, weight='regular', size=11),               
+                        datetime_format=' %m/%d/%Y',
+                        tight_layout=settings['tight_layout'],
+                        block=True,
+                        returnfig = True,
+                        ylabel="Implied Volatility (%)")        
     
     return
 
     
 # Make a candlestick plot of intraday data.
-def plot_timesales(data, underlying_data, data_title, settings):    
+def plot_timesales(data, underlying_data, data_title, settings, toGraph):    
     check_data_validity(data)
 
     # ohlc for the underlying symbol. will use this to calculate IV
@@ -223,14 +228,14 @@ def plot_timesales(data, underlying_data, data_title, settings):
 
         s = standard_style(settings)                
         kwargs = dict(type='candle',volume=True) 
-        print("----here-----") 
-        return mpf.plot(df, **kwargs, style=s, 
-                    title=dict(title="\n\n" + data_title, weight='regular', size=11),               
-                    datetime_format=' %m/%d %H:%M',
-                    #tight_layout=settings['tight_layout'],
-                    block=False, #False
-                    returnfig=True,
-                    ylabel="Option Price ($)")     
+        if toGraph == "Price":
+            return mpf.plot(df, **kwargs, style=s, 
+                        title=dict(title="\n\n" + data_title, weight='regular', size=11),               
+                        datetime_format=' %m/%d %H:%M',
+                        #tight_layout=settings['tight_layout'],
+                        block=False, #False
+                        returnfig=True,
+                        ylabel="Option Price ($)")     
              
     else:
         print("No option trades during period.")
@@ -254,15 +259,17 @@ def plot_timesales(data, underlying_data, data_title, settings):
         df_iv = drop_nonmarket_periods(df_iv)    
         # Resample the volatility data.
         
-        s = volatility_style(settings)
+        s = standard_style(settings)
         kwargs = dict(type='candle',volume=False)  
-        mpf.plot(df_iv, **kwargs, style=s, 
-                mav=3,
-                title=dict(title="\n\nImplied Volatility for " + data_title, weight='regular', size=11),               
-                datetime_format=' %m/%d %H:%M',
-                tight_layout=settings['tight_layout'],
-                block=True,
-                ylabel="Implied Volatility (%)")        
+        if toGraph == "IV":
+            return mpf.plot(df_iv, **kwargs, style=s, 
+                        mav=3,
+                        title=dict(title="\n\nImplied Volatility for " + data_title, weight='regular', size=11),               
+                        datetime_format=' %m/%d %H:%M',
+                        tight_layout=settings['tight_layout'],
+                        block=True,
+                        returnfig = True,
+                        ylabel="Implied Volatility (%)")        
     
     return
 
@@ -363,9 +370,8 @@ def on_xlims_change(axes):
 # If there's only one trade in then it returns a dictionary instead of a list of dict
 def check_data_validity(source):
     if (type(source) == type({})):
-        print("Insufficient trade data. Printing all data and terminating Program.")
+        print("Insufficient trade data")
         print(source)
-        exit()
 
 
 # Drop-weekends from resampled data. Need to be careful about this if we resample to weekly/monthly.
@@ -398,15 +404,18 @@ def drop_nonmarket_periods(dataframe):
     
 # Standardized plot style between timesales and history trading plots
 def standard_style(settings):
-    return mpf.make_mpf_style(base_mpf_style='yahoo', 
+    mc = mpf.make_marketcolors(base_mpf_style='yahoo')
+    return mpf.make_mpf_style(base_mpf_style='nightclouds', 
                               rc={'font.size':9,
                                   'font.weight':'light',
                                   'axes.edgecolor':'black',
                                   'figure.figsize':(8.0, 4.8)
                                   }, 
                               y_on_right=False,
-                              facecolor='w',
-                              gridstyle=settings['gridstyle']
+                              #facecolor='w',
+                              figcolor = '#161616',
+                              gridstyle=settings['gridstyle'],
+                              marketcolors=mc
                               )
 
 

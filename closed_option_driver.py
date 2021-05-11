@@ -9,11 +9,26 @@ Description: This script is the sister script to run_sybil_plotter.py and works 
 import tp_plot_manager as tpm #formerly pm
 import tp_request_manager as trm #formerly sdg
 import tp_settings as tps
-import tp_ui_manager as tpu # formerly sui
+
+# Adjust the underlying data for stock-splits if there was one.         
+def stock_split_adjustment(ratio, underlying):
+    if ratio == 0:
+        return underlying
+
+    new_list = []
+    for entry in underlying:
+        tmp_dict = {}
+        tmp_dict['date'] = entry['date']
+        tmp_dict['open'] = float(entry['open'])*ratio
+        tmp_dict['high'] = float(entry['high'])*ratio
+        tmp_dict['low'] = float(entry['low'])*ratio
+        tmp_dict['close'] = float(entry['close'])*ratio
+        tmp_dict['volume'] = float(entry['volume'])*ratio
+        new_list.append(tmp_dict)
+    
+    return new_list
 
 
-
-tpu.intro_screen(); # just some printing / instructions to introduce the program
 settings    = tps.get_settings()
 symbol      = input("Enter a symbol to proceed: ").upper()
 option_type = input("Select calls [c] or puts [p]: ").upper()
@@ -57,7 +72,7 @@ underlying_data = trm.get_underlying_data(symbol,
                                           settings['API_KEY'])
 
 # If there was a stock split, adjust the share price to account and keep IV calculation accurate. 
-underlying_data = tpu.stock_split_adjustment(float(split_ratio),
+underlying_data = stock_split_adjustment(float(split_ratio),
                                              underlying_data)
 
 tpm.plot_data(trade_data, 
