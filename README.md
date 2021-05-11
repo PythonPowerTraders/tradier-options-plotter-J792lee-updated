@@ -1,5 +1,6 @@
-# Extention of MySybil's Historic Options Data Plotter: Faster computations, implementation og Greeks, and updated UI
+# Extention of MySybil's Historic Options Data Plotter: Faster computations, implementation of Greeks, and updated UI
 
+![Example](./screens/aapl_put.png)
 
 This set of scripts aims to provide free access to historic options trade data for anyone that wants it. Whether you want to simply quickly view trade history, or if you want to use these scripts as a starting point to build from, the main hope is to save you time and provide you a small amount of independence from your broker and any websites trying to make money off of you.
 
@@ -46,81 +47,20 @@ python3 main.py
 ```
 
 As a quick example, run the script and input a ticker in the "ticker" box. In this case, we will input SPY
-```
-Enter: SPY
-```
 
-You'll be prompted to enter either calls or puts.
+Here, you enter the ticker then click enter.
 
-```
-Select call options by entering: C
-```
+![SPY Ticker](./screens/spy_call_outline_ticker.png)
 
-The script will download a list of all available options dates and prompt you to enter one.
-```
-Enter: 2021-01-15
-```
+You can then select the option specifications you desire.
 
-You'll be prompted to select a strike.
-```
-Enter: 325
-```
+![Specs](./screens/spy_call_outline_option.png)
 
-You'll be prompted for the earliest trade data you want to look at:
-```
-Enter: 2019-01-01
-```
+Here, you can select what you want to plot. The options include price, IV, and the Greeks.
 
-The program should download all the data and then display a candlestick chart of the daily trade data. Something along the lines of the figures below (the candlestick binning can be changed in the settings inside the driver file):
+![what to plot](./screens/aapl_put.png)
 
-SPY Intraday: 
-
-![SPY Intraday](./screens/spy-345c-trade.png)
-
-SPY Intrady Implied Volatility: 
-
-![SPY Volatility](./screens/spy-345c-volatility.png)
-
-60 Days of SPY Price History:
-
-![SPY 60D](./screens/spy-350c-trade-60d.png)
-
-A Full Year of SPY Implied Volatility:
-
-![SPY Year Volatility](./screens/spy-350c-vol-year.png)
-
-
-Example Data Output (Daily data):
-
-```
-
-             Open   High    Low  Close  Volume  IV (%)
-Date                                                  
-2020-07-21   4.95   4.95   4.95   4.95       1   44.80
-2020-07-22   5.65   5.65   5.65   5.65       1   45.50
-2020-07-23    NaN    NaN    NaN    NaN       0     NaN
-2020-07-24    NaN    NaN    NaN    NaN       0     NaN
-2020-07-27   4.85   4.85   4.85   4.85       3   44.95
-2020-07-28    NaN    NaN    NaN    NaN       0     NaN
-2020-07-29    NaN    NaN    NaN    NaN       0     NaN
-2020-07-30   5.45   5.45   5.45   5.45       1   45.25
-2020-07-31   6.00   6.00   5.90   5.90       2   46.71
-2020-08-03   6.68   8.86   6.68   8.55     386   47.42
-2020-08-04   8.88   9.95   8.88   9.95      14   47.39
-...
-...
-...          Output truncated for README
-...
-...
-2020-09-30  12.50  19.03  12.14  17.50    1573   45.46
-2020-10-01  21.25  21.25  15.50  18.32    1452   45.83
-2020-10-02  12.90  17.45   8.75   8.75    2446   45.74
-2020-10-05  10.80  15.15  10.45  13.95    5426   38.72
-2020-10-06  17.05  25.60  14.40  16.55    4529   43.01
-2020-10-07  22.15  24.40  17.80  19.50    1009   40.19
-2020-10-08  22.00  22.15  14.00  15.57    1524   40.36
-
-```
+The program should download all the data and then display a candlestick chart of the trade data after each change you make to the specifications.
 
 * Note: the Implied Volatility data that is printed is the 'close' data point. See the note below. 
 
@@ -132,7 +72,7 @@ To account for this, the script calculates four volatility values for every inte
 
 **The wick DOES NOT imply that the there was a trade with that implied volatility - only that it is possible that there COULD HAVE BEEN.**
 
-SPY Multi-Year Daily Volatility: 
+SQQQ Volatility over the past week: 
 
 ![SPY Longterm Volatility](./screens/spy-longterm.png)
 
