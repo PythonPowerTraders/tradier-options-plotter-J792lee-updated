@@ -89,7 +89,7 @@ AMD Volatility:
 
 QCOM Volatility:
 
-![QCOM Volatility](./screens/qcom_iv.png)
+![QCOM Volatility](./screens/qcom_monthly_iv.png)
 
 GME Volatility:
  
