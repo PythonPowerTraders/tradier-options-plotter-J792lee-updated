@@ -1,5 +1,4 @@
 from tkinter import *
-from tp_request_manager import get_expiry_dates, get_strike_list
 import mplfinance as mpf
 from matplotlib.figure import Figure
 import pandas as pd
@@ -131,7 +130,7 @@ def makePlot():
 def change_expiry_dropdown():
     expiryDropdown.configure(state="normal")
     try:
-        optionsDates = get_expiry_dates(ticker, settings["API_KEY"])
+        optionsDates = trm.get_expiry_dates(ticker, settings["API_KEY"])
     except:
         return
 
@@ -146,7 +145,7 @@ def change_expiry_dropdown():
 def change_strike_dropdown():
     strikeDropdown.configure(state="normal")
     try:
-        options_strikes = get_strike_list(ticker, optionsDropdownString.get(), settings["API_KEY"])
+        options_strikes = trm.get_strike_list(ticker, optionsDropdownString.get(), settings["API_KEY"])
     except:
         return
     closest = findClosestStrike(last_price, options_strikes)
