@@ -39,14 +39,13 @@ and move the created .so file to the root directory.
 
 ### Run Example
 
-From the CLI run:
+To run:
 
 ```
-python3 run_sybil_plotter.py
+python3 main.py
 ```
 
-As a quick example, run the script and the first prompt should be to "Enter a symbol to proceed: "
-
+As a quick example, run the script and input a ticker in the "ticker" box. In this case, we will input SPY
 ```
 Enter: SPY
 ```
