@@ -78,10 +78,6 @@ To account for this, the script calculates four volatility values for every inte
 **The wick DOES NOT imply that the there was a trade with that implied volatility - only that it is possible that there COULD HAVE BEEN.**
 
 examples:
-
-SQQQ Volatility over the past week: 
-
-![SQQQ Volatility](./screens/sqqq_call_vol)
  
 AMD Volatility:
 
