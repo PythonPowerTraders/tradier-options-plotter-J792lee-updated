@@ -1,5 +1,6 @@
 # Extention of MySybil's Historic Options Data Plotter: Faster computations, implementation og Greeks, and updated UI
 
+![Example](./screens/appl_put.png)
 
 This set of scripts aims to provide free access to historic options trade data for anyone that wants it. Whether you want to simply quickly view trade history, or if you want to use these scripts as a starting point to build from, the main hope is to save you time and provide you a small amount of independence from your broker and any websites trying to make money off of you.
 
